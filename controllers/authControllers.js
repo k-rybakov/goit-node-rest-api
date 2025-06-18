@@ -117,35 +117,4 @@ export const getCurrent = async (req, res) => {
   } catch (error) {
     res.status(error.status || 500).json({ message: error.message });
   }
-};
-
-export const authenticate = async (req, res, next) => {
-  try {
-    const { authorization = '' } = req.headers;
-    const [bearer, token] = authorization.split(' ');
-
-    if (bearer !== 'Bearer' || !token) {
-      throw HttpError(401, 'Not authorized');
-    }
-
-    const { id } = jwt.verify(token, JWT_SECRET);
-
-    const user = await User.findByPk(id);
-
-    if (!user) {
-      throw HttpError(401, 'Not authorized');
-    }
-
-    if (user.token !== token) {
-      throw HttpError(401, 'Not authorized');
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      next(HttpError(401, 'Not authorized'));
-    }
-    next(error);
-  }
 }; 
