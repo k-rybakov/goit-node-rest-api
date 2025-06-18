@@ -7,6 +7,8 @@ dotenv.config();
 
 import sequelize from "./config/database.js";
 import contactsRouter from "./routes/contactsRouter.js";
+import authRouter from "./routes/authRouter.js";
+import { authenticate } from "./middleware/auth.js";
 
 const app = express();
 
@@ -14,7 +16,8 @@ app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/contacts", contactsRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/contacts", authenticate, contactsRouter);
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
