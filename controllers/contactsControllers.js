@@ -7,7 +7,7 @@ import {
 
 export const getAllContacts = async (req, res) => {
   try {
-    const { _id: ownerId } = req.user;
+    const { id: ownerId } = req.user;
     const contacts = await contactsService.listContacts(ownerId);
     res.json(contacts);
   } catch (error) {
@@ -18,7 +18,7 @@ export const getAllContacts = async (req, res) => {
 export const getOneContact = async (req, res) => {
   try {
     const { id } = req.params;
-    const { _id: ownerId } = req.user;
+    const { id: ownerId } = req.user;
     const contact = await contactsService.getContactById(id, ownerId);
 
     if (!contact) {
@@ -34,7 +34,7 @@ export const getOneContact = async (req, res) => {
 export const deleteContact = async (req, res) => {
   try {
     const { id } = req.params;
-    const { _id: ownerId } = req.user;
+    const { id: ownerId } = req.user;
     const contact = await contactsService.removeContact(id, ownerId);
 
     if (!contact) {
@@ -55,7 +55,7 @@ export const createContact = async (req, res) => {
     }
 
     const { name, email, phone } = req.body;
-    const { _id: ownerId } = req.user;
+    const { id: ownerId } = req.user;
     const contact = await contactsService.addContact(name, email, phone, ownerId);
 
     res.status(201).json(contact);
@@ -67,7 +67,7 @@ export const createContact = async (req, res) => {
 export const updateContact = async (req, res) => {
   try {
     const { id } = req.params;
-    const { _id: ownerId } = req.user;
+    const { id: ownerId } = req.user;
 
     if (!req.body || Object.keys(req.body).length === 0) {
       throw HttpError(400, "Body must have at least one field");
@@ -94,7 +94,7 @@ export const updateStatusContact = async (req, res) => {
   try {
     const { id } = req.params;
     const { favorite } = req.body;
-    const { _id: ownerId } = req.user;
+    const { id: ownerId } = req.user;
 
     if (favorite === undefined) {
       throw HttpError(400, "Missing field favorite");
