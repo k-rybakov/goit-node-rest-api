@@ -2,8 +2,10 @@ import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import * as createContacts from './20250618000000-create-contacts.js';
 import * as createUsers from './20250618000001-create-users.js';
 import * as addOwnerToContacts from './20250618000002-add-owner-to-contacts.js';
+import * as addAvatarToUsers from './20240320000003-add-avatar-to-users.js';
 
 dotenv.config();
 
@@ -40,14 +42,20 @@ async function runMigrations() {
     // Drop existing tables first
     await dropTables();
 
-    // Run migrations
+    // Run migrations in correct order
     console.log('Running migrations...');
+    
+    await createContacts.up(sequelize.getQueryInterface(), Sequelize);
+    console.log('Contacts table created successfully');
     
     await createUsers.up(sequelize.getQueryInterface());
     console.log('Users table created successfully');
     
     await addOwnerToContacts.up(sequelize.getQueryInterface());
     console.log('Owner column added to contacts table successfully');
+
+    await addAvatarToUsers.up(sequelize.getQueryInterface(), Sequelize);
+    console.log('Avatar column added to users table successfully');
 
     console.log('All migrations completed successfully');
     process.exit(0);
