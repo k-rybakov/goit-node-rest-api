@@ -106,4 +106,4 @@ tmp/
 temp/
 
 # Upload directories (keep structure but ignore uploaded files)
-uploads/ 
+temp/ 

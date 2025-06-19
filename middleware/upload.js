@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../uploads"));
+    cb(null, path.join(__dirname, '../temp'));
   },
   filename: (req, file, cb) => {
     const uniqueName = `${req.user.id}_${Date.now()}${path.extname(
@@ -33,4 +33,4 @@ const upload = multer({
   },
 });
 
-export default upload;
+export default upload; 
