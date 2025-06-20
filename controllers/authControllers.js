@@ -149,6 +149,14 @@ export const uploadAvatar = async (req, res) => {
       throw HttpError(401, "Not authorized");
     }
 
+    // Ensure avatars directory exists
+    const avatarsDir = path.join(__dirname, "../public/avatars");
+    try {
+      await fs.access(avatarsDir);
+    } catch (error) {
+      await fs.mkdir(avatarsDir, { recursive: true });
+    }
+
     // Delete old avatar if it's a local file (not Gravatar)
     if (user.avatarURL && user.avatarURL.startsWith("/avatars/")) {
       const oldAvatarPath = path.join(__dirname, "../public", user.avatarURL);
@@ -163,7 +171,7 @@ export const uploadAvatar = async (req, res) => {
     // Move file from temp to public/avatars
     const tempPath = req.file.path;
     const filename = req.file.filename;
-    const finalPath = path.join(__dirname, "../public/avatars", filename);
+    const finalPath = path.join(avatarsDir, filename);
 
     await fs.rename(tempPath, finalPath);
 

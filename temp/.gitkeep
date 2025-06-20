@@ -1,0 +1,2 @@
+# This file ensures that the temp directory is tracked by Git
+# The temp directory is used for temporary file uploads 

@@ -103,7 +103,5 @@ logs
 
 # Temporary folders
 tmp/
-temp/
-
-# Upload directories (keep structure but ignore uploaded files)
-temp/ 
+temp/*
+!temp/.gitkeep 
