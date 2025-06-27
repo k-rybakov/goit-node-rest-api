@@ -1,9 +1,15 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import gravatar from "gravatar";
+import { nanoid } from "nanoid";
 import User from "../models/User.js";
 import HttpError from "../helpers/HttpError.js";
-import { registerSchema, loginSchema } from "../schemas/authSchemas.js";
+import {
+  registerSchema,
+  loginSchema,
+  emailSchema,
+} from "../schemas/authSchemas.js";
+import { sendVerificationEmail } from "../services/emailService.js";
 import fs from "fs/promises";
 import dotenv from "dotenv";
 import path from "path";
@@ -41,11 +47,21 @@ export const register = async (req, res) => {
     });
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationToken = nanoid();
+
     const user = await User.create({
       email,
       password: hashedPassword,
       avatarURL: avatarURL,
+      verificationToken,
     });
+
+    // Send verification email
+    try {
+      await sendVerificationEmail(email, verificationToken);
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+    }
 
     res.status(201).json({
       user: {
@@ -76,6 +92,10 @@ export const login = async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw HttpError(401, "Email or password is wrong");
+    }
+
+    if (!user.verify) {
+      throw HttpError(401, "Email not verified");
     }
 
     if (!JWT_SECRET) {
@@ -192,6 +212,55 @@ export const uploadAvatar = async (req, res) => {
         console.log("Failed to clean up uploaded file:", unlinkError.message);
       }
     }
+    res.status(error.status || 500).json({ message: error.message });
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  try {
+    const { verificationToken } = req.params;
+
+    const user = await User.findOne({ where: { verificationToken } });
+    if (!user) {
+      throw HttpError(404, "User not found");
+    }
+
+    user.verify = true;
+    user.verificationToken = null;
+    await user.save();
+
+    res.json({
+      message: "Verification successful",
+    });
+  } catch (error) {
+    res.status(error.status || 500).json({ message: error.message });
+  }
+};
+
+export const resendVerificationEmail = async (req, res) => {
+  try {
+    const { error } = emailSchema.validate(req.body);
+    if (error) {
+      throw HttpError(400, error.message);
+    }
+
+    const { email } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      throw HttpError(404, "User not found");
+    }
+
+    if (user.verify) {
+      throw HttpError(400, "Verification has already been passed");
+    }
+
+    await sendVerificationEmail(email, user.verificationToken);
+
+    res.json({
+      message: "Verification email sent",
+    });
+  } catch (error) {
     res.status(error.status || 500).json({ message: error.message });
   }
 };
