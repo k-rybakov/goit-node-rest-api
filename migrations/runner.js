@@ -5,7 +5,8 @@ import { fileURLToPath } from 'url';
 import * as createContacts from './20250618000000-create-contacts.js';
 import * as createUsers from './20250618000001-create-users.js';
 import * as addOwnerToContacts from './20250618000002-add-owner-to-contacts.js';
-import * as addAvatarToUsers from './20240320000003-add-avatar-to-users.js';
+import * as addAvatarToUsers from './20250619000003-add-avatar-to-users.js';
+import * as addVerificationToUsers from './20250619000004-add-verification-to-users.js';
 
 dotenv.config();
 
@@ -56,6 +57,9 @@ async function runMigrations() {
 
     await addAvatarToUsers.up(sequelize.getQueryInterface(), Sequelize);
     console.log('Avatar column added to users table successfully');
+
+    await addVerificationToUsers.up(sequelize.getQueryInterface(), Sequelize);
+    console.log('Verification columns added to users table successfully');
 
     console.log('All migrations completed successfully');
     process.exit(0);
